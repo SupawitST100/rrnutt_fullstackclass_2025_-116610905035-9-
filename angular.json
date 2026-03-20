@@ -26,9 +26,13 @@
               }
             ],
             "styles": [
+<<<<<<< HEAD
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "src/styles.scss"
+=======
+              "src/styles.css"
+>>>>>>> cdfeec59ca7a141783b903c3730bcec6a04e3ce3
             ],
             "server": "src/main.server.ts",
             "outputMode": "server",
@@ -37,6 +41,7 @@
             },
             "ssr": {
               "entry": "src/server.ts"
+<<<<<<< HEAD
             },
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
@@ -44,6 +49,9 @@
             "polyfills": [
               "zone.js"
             ]
+=======
+            }
+>>>>>>> cdfeec59ca7a141783b903c3730bcec6a04e3ce3
           },
           "configurations": {
             "production": {
@@ -87,4 +95,8 @@
       }
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> cdfeec59ca7a141783b903c3730bcec6a04e3ce3

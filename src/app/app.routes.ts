@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+<<<<<<< HEAD
 import { authGuard, adminGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -50,4 +51,30 @@ export const routes: Routes = [
     loadComponent: () => import('./components/admin/admin.component').then(m => m.AdminComponent)
   },
   { path: '**', redirectTo: '' }
+=======
+
+export const routes: Routes = [
+  {
+    path: 'customers/:id',
+    loadComponent: () =>
+      import('./components/customers/customer-profile/customer-profile.component').then(
+        (m) => m.CustomerProfileComponent
+      ),
+  },
+  {
+    path: 'reviews',
+    loadComponent: () =>
+      import('./components/reviews/review-list/review-list.component').then(
+        (m) => m.ReviewListComponent
+      ),
+  },
+  {
+    path: 'reviews/new',
+    loadComponent: () =>
+      import('./components/reviews/review-form/review-form.component').then(
+        (m) => m.ReviewFormComponent
+      ),
+  },
+  { path: '', redirectTo: 'reviews', pathMatch: 'full' },
+>>>>>>> cdfeec59ca7a141783b903c3730bcec6a04e3ce3
 ];

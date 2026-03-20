@@ -1,0 +1,173 @@
+<div class="review-form-wrap">
+
+  <!-- ── Loading Profile ─────────────────────────────────────── -->
+  @if (loadingProfile()) {
+    <div class="profile-loading">
+      <div class="spinner"></div>
+      <p>Loading your profile...</p>
+    </div>
+  }
+
+  <!-- ── Profile Error ───────────────────────────────────────── -->
+  @if (profileError()) {
+    <div class="profile-error">
+      <span>⚠</span>
+      <p>{{ profileError() }}</p>
+    </div>
+  }
+
+  <!-- ── Main Form ───────────────────────────────────────────── -->
+  @if (!loadingProfile() && customer()) {
+    <div class="form-card">
+
+      <!-- Reviewer Identity Banner -->
+      <div class="reviewer-banner">
+        <div class="reviewer-avatar">{{ getInitials() }}</div>
+        <div class="reviewer-info">
+          <p class="reviewer-name">{{ customerName() }}</p>
+          <p class="reviewer-email">{{ customer()!.email }}</p>
+        </div>
+        <span class="reviewer-tier">
+          {{ getTierIcon() }} {{ customer()!.tier | titlecase }}
+        </span>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- Success Toast -->
+      @if (success()) {
+        <div class="success-msg">
+          ✅ Review submitted! Redirecting to reviews...
+        </div>
+      }
+
+      <!-- ── Step 1: Select Trip ──────────────────────────────── -->
+      <div class="field">
+        <label class="field-label">
+          <span class="step-num">1</span> Select Your Trip
+        </label>
+
+        @if (availableBookings().length === 0) {
+          <div class="no-bookings">
+            <span class="no-bookings-icon">🗺️</span>
+            <p>No unreviewed trips found. All your trips have been reviewed!</p>
+          </div>
+        }
+
+        @if (selectedBooking()) {
+          <div class="dest-selected" (click)="clearBooking()">
+            <span class="dest-flag">{{ selectedBooking()!.destinationFlag }}</span>
+            <div class="dest-info">
+              <span class="dest-text">
+                {{ selectedBooking()!.destinationName }}, {{ selectedBooking()!.destinationCountry }}
+              </span>
+              <span class="dest-travel-date">
+                🗓 {{ selectedBooking()!.travelDate | date:'MMMM yyyy' }}
+              </span>
+            </div>
+            <span class="dest-change">Change</span>
+          </div>
+        } @else {
+          <div class="dest-grid">
+            @for (booking of availableBookings(); track booking.id) {
+              <button type="button" class="dest-btn" (click)="selectBooking(booking)">
+                <span class="dest-flag">{{ booking.destinationFlag }}</span>
+                <span class="dest-name">{{ booking.destinationName }}</span>
+                <span class="dest-country">{{ booking.destinationCountry }}</span>
+                <span class="dest-date">{{ booking.travelDate | date:'MMM yyyy' }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ── Step 2: Rating ───────────────────────────────────── -->
+      <div class="field">
+        <label class="field-label">
+          <span class="step-num">2</span> Your Rating
+        </label>
+        <div class="star-picker">
+          @for (s of stars; track s) {
+            <span
+              class="pick-star"
+              [class.filled]="isStarFilled(s)"
+              (mouseenter)="setHover(s)"
+              (mouseleave)="clearHover()"
+              (click)="setRating(s)">★</span>
+          }
+          <span class="rating-label">{{ getRatingLabel() }}</span>
+        </div>
+      </div>
+
+      <!-- ── Step 3: Title ────────────────────────────────────── -->
+      <div class="field">
+        <label class="field-label">
+          <span class="step-num">3</span> Review Title
+        </label>
+        <input
+          class="text-input"
+          [class.has-error]="title().length > 0 && title().trim().length < 5"
+          type="text"
+          [ngModel]="title()"
+          (ngModelChange)="title.set($event)"
+          placeholder="Summarize your experience..." />
+        @if (title().length > 0 && title().trim().length < 5) {
+          <p class="error-msg">Please enter at least 5 characters</p>
+        }
+      </div>
+
+      <!-- ── Step 4: Comment ──────────────────────────────────── -->
+      <div class="field">
+        <label class="field-label">
+          <span class="step-num">4</span> Your Review
+        </label>
+        <textarea
+          class="text-area"
+          [class.has-error]="comment().length > 0 && comment().trim().length < 20"
+          rows="4"
+          [ngModel]="comment()"
+          (ngModelChange)="comment.set($event)"
+          placeholder="Share the details of your experience..."></textarea>
+        <div class="comment-footer">
+          @if (comment().length > 0 && comment().trim().length < 20) {
+            <p class="error-msg">Please write at least 20 characters</p>
+          } @else {
+            <span></span>
+          }
+          <span class="char-count" [class.near-limit]="comment().length > 450">
+            {{ comment().length }} / 500
+          </span>
+        </div>
+      </div>
+
+      <!-- ── Step 5: Tags ─────────────────────────────────────── -->
+      <div class="field">
+        <label class="field-label">
+          <span class="step-num">5</span> Tags
+          <span class="optional">(optional)</span>
+        </label>
+        <div class="tag-picker">
+          @for (tag of availableTags; track tag) {
+            <button
+              type="button"
+              class="tag-opt"
+              [class.selected]="isTagSelected(tag)"
+              (click)="toggleTag(tag)">
+              # {{ tag }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button
+        type="button"
+        class="submit-btn"
+        [disabled]="submitting() || !isFormValid()"
+        (click)="onSubmit()">
+        {{ submitting() ? 'Submitting...' : 'Submit Review' }}
+      </button>
+
+    </div>
+  }
+</div>

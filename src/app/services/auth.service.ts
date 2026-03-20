@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Injectable, signal, computed, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -60,5 +61,22 @@ export class AuthService {
 
   get currentCustomerId(): number | null {
     return this._user()?.id ?? null;
+=======
+import { Injectable, signal } from '@angular/core';
+
+/** Simulates the currently logged-in customer session. */
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  /** In a real app this would come from JWT / OAuth. */
+  private readonly _currentCustomerId = signal<string>('c001');
+
+  get currentCustomerId(): string {
+    return this._currentCustomerId();
+  }
+
+  /** Switch the active user (for demo/testing purposes). */
+  switchUser(id: string): void {
+    this._currentCustomerId.set(id);
+>>>>>>> cdfeec59ca7a141783b903c3730bcec6a04e3ce3
   }
 }
