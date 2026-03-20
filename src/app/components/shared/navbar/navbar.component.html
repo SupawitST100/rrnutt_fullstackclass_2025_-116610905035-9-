@@ -1,0 +1,85 @@
+<nav class="navbar navbar-expand-lg navbar-travel px-3">
+  <div class="container-xl">
+    <a class="navbar-brand d-flex align-items-center gap-2" routerLink="/">
+      <i class="bi bi-airplane-engines-fill fs-5 text-info"></i>
+      <span>TravelBooking</span>
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto gap-1 mt-2 mt-lg-0">
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <i class="bi bi-house-door me-1"></i>หน้าหลัก
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2" routerLink="/destinations" routerLinkActive="active">
+            <i class="bi bi-geo-alt me-1"></i>สถานที่
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2" routerLink="/packages" routerLinkActive="active">
+            <i class="bi bi-bag-heart me-1"></i>แพ็กเกจ
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2" routerLink="/flights" routerLinkActive="active">
+            <i class="bi bi-airplane me-1"></i>เที่ยวบิน
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2" routerLink="/hotels" routerLinkActive="active">
+            <i class="bi bi-building me-1"></i>โรงแรม
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2" routerLink="/reviews" routerLinkActive="active">
+            <i class="bi bi-star me-1"></i>รีวิว
+          </a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav gap-1 mt-2 mt-lg-0">
+        @if (auth.isLoggedIn()) {
+          <li class="nav-item">
+            <a class="nav-link px-3 py-2" routerLink="/bookings" routerLinkActive="active">
+              <i class="bi bi-calendar-check me-1"></i>การจอง
+            </a>
+          </li>
+          @if (auth.isAdmin()) {
+            <li class="nav-item">
+              <a class="nav-link px-3 py-2" routerLink="/admin" routerLinkActive="active">
+                <i class="bi bi-shield-check me-1"></i>Admin
+              </a>
+            </li>
+          }
+          <li class="nav-item dropdown">
+            <a class="nav-link px-3 py-2 dropdown-toggle" role="button" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle me-1"></i>{{ auth.user()?.firstname }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" routerLink="/profile"><i class="bi bi-person me-2"></i>โปรไฟล์</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger cursor-pointer" (click)="logout()"><i class="bi bi-box-arrow-right me-2"></i>ออกจากระบบ</a></li>
+            </ul>
+          </li>
+        } @else {
+          <li class="nav-item">
+            <a class="nav-link px-3 py-2" routerLink="/login" routerLinkActive="active">
+              <i class="bi bi-box-arrow-in-right me-1"></i>เข้าสู่ระบบ
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-info btn-sm text-white px-3 ms-1" routerLink="/register">
+              <i class="bi bi-person-plus me-1"></i>สมัครสมาชิก
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</nav>

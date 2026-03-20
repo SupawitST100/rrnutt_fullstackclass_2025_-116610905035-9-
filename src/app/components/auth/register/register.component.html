@@ -1,0 +1,66 @@
+<div class="min-vh-100 d-flex align-items-center py-4" style="background: linear-gradient(135deg, var(--navy) 0%, var(--primary) 100%);">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="text-center text-white mb-4">
+          <i class="bi bi-airplane-engines-fill display-4 text-info"></i>
+          <h3 class="fw-bold mt-2">TravelBooking</h3>
+        </div>
+        <div class="card border-0 shadow-lg" style="border-radius: var(--radius-lg);">
+          <div class="card-body p-4">
+            <h4 class="fw-bold text-center mb-1" style="color: var(--navy);">สมัครสมาชิก</h4>
+            <p class="text-muted text-center small mb-4">สร้างบัญชีใหม่ฟรี</p>
+
+            @if (error) {
+              <div class="alert alert-danger d-flex align-items-center gap-2 py-2">
+                <i class="bi bi-exclamation-circle-fill"></i>{{ error }}
+              </div>
+            }
+
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label fw-medium small">ชื่อ</label>
+                <input class="form-control" [(ngModel)]="form.firstname" placeholder="ชื่อ" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-medium small">นามสกุล</label>
+                <input class="form-control" [(ngModel)]="form.lastname" placeholder="นามสกุล" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-medium small">อีเมล</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-envelope text-muted"></i></span>
+                  <input type="email" class="form-control" [(ngModel)]="form.email" placeholder="your@email.com" required>
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-medium small">เบอร์โทรศัพท์</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-phone text-muted"></i></span>
+                  <input class="form-control" [(ngModel)]="form.phone" placeholder="08x-xxx-xxxx">
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-medium small">รหัสผ่าน</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
+                  <input type="password" class="form-control" [(ngModel)]="form.password" placeholder="อย่างน้อย 8 ตัวอักษร" required>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary w-100 py-2 fw-semibold mt-4" (click)="submit()" [disabled]="loading">
+              @if (loading) { <span class="spinner-border spinner-border-sm me-2"></span> }
+              <i class="bi bi-person-plus me-2"></i>สมัครสมาชิก
+            </button>
+            <hr class="my-3">
+            <p class="text-center text-muted small mb-0">
+              มีบัญชีแล้ว?
+              <a routerLink="/login" class="fw-semibold" style="color: var(--primary);">เข้าสู่ระบบ</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,107 @@
+<div class="page-banner">
+  <div class="container-xl">
+    <h1><i class="bi bi-person-circle me-2"></i>โปรไฟล์ของฉัน</h1>
+  </div>
+</div>
+
+<div class="container-xl pb-5">
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (customer(); as c) {
+    <div class="row g-4">
+
+      <!-- ข้อมูลส่วนตัว -->
+      <div class="col-lg-5">
+        <div class="card-travel p-4">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold"
+                 style="width:64px;height:64px;font-size:1.6rem;">
+              {{ c.firstname[0].toUpperCase() }}
+            </div>
+            <div>
+              <h5 class="fw-bold mb-1" style="color:var(--navy)">{{ c.firstname }} {{ c.lastname }}</h5>
+              <span class="text-muted small">{{ c.email }}</span>
+            </div>
+          </div>
+
+          @if (!editing) {
+            <div class="row g-3 mb-4">
+              <div class="col-12">
+                <div class="text-muted small">อีเมล</div>
+                <div class="fw-medium">{{ c.email }}</div>
+              </div>
+              <div class="col-12">
+                <div class="text-muted small">เบอร์โทรศัพท์</div>
+                <div class="fw-medium">{{ c.phone || '-' }}</div>
+              </div>
+              <div class="col-12">
+                <div class="text-muted small">สมาชิกตั้งแต่</div>
+                <div class="fw-medium">{{ c.created_at | date:'dd MMM yyyy' }}</div>
+              </div>
+            </div>
+            <button class="btn btn-outline-primary w-100" (click)="startEdit()">
+              <i class="bi bi-pencil me-1"></i>แก้ไขข้อมูล
+            </button>
+          } @else {
+            <div class="row g-3 mb-4">
+              <div class="col-6">
+                <label class="form-label small fw-medium">ชื่อ</label>
+                <input class="form-control" [(ngModel)]="form.firstname">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-medium">นามสกุล</label>
+                <input class="form-control" [(ngModel)]="form.lastname">
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-medium">เบอร์โทรศัพท์</label>
+                <input class="form-control" [(ngModel)]="form.phone">
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary flex-fill" (click)="save()" [disabled]="saving">
+                @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                บันทึก
+              </button>
+              <button class="btn btn-light" (click)="editing=false">ยกเลิก</button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ประวัติการจอง -->
+      <div class="col-lg-7">
+        <div class="card-travel p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0" style="color:var(--navy)">
+              <i class="bi bi-calendar-check me-2 text-primary"></i>ประวัติการจอง
+            </h6>
+            <a routerLink="/bookings" class="text-primary small">ดูทั้งหมด <i class="bi bi-arrow-right"></i></a>
+          </div>
+          @if (bookings().length === 0) {
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+              <p class="small mb-3">ยังไม่มีประวัติการจอง</p>
+              <a routerLink="/packages" class="btn btn-primary btn-sm">จองเลย</a>
+            </div>
+          } @else {
+            <div class="d-flex flex-column gap-2">
+              @for (b of bookings().slice(0,5); track b.id) {
+                <div class="d-flex justify-content-between align-items-center p-2 rounded-3 bg-light">
+                  <div>
+                    <div class="fw-medium small" style="color:var(--navy)">#{{ b.id }}</div>
+                    <div class="text-muted" style="font-size:0.75rem;">{{ b.booking_date | date:'dd MMM yyyy' }}</div>
+                  </div>
+                  <div class="text-end">
+                    <div class="fw-bold small" style="color:var(--primary)">฿{{ b.total_amount.toLocaleString() }}</div>
+                    <span class="small rounded-pill px-2" [class]="statusClass(b.status)">{{ b.status }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+</div>

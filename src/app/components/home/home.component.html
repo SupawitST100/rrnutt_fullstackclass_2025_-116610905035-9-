@@ -1,0 +1,93 @@
+<!-- Hero -->
+<section style="background: linear-gradient(135deg, var(--navy) 0%, var(--primary) 100%); padding: 60px 0;">
+  <div class="container text-center text-white">
+    <h1 class="fw-bold mb-2">เริ่มต้นการเดินทางในฝันของคุณ ✈️</h1>
+    <p class="opacity-75 mb-4">เลือกบริการที่คุณต้องการ แล้วปล่อยให้เราดูแล</p>
+    <div class="d-flex gap-3 justify-content-center">
+      <a routerLink="/flights" class="btn btn-light px-4 fw-semibold" style="color:var(--primary)">
+        <i class="bi bi-airplane me-1"></i> ค้นหาเที่ยวบิน
+      </a>
+      <a routerLink="/hotels" class="btn btn-outline-light px-4">
+        <i class="bi bi-building me-1"></i> ค้นหาที่พัก
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- จุดหมายยอดฮิต -->
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h5 class="fw-bold mb-0" style="color:var(--navy)">📍 จุดหมายยอดฮิต</h5>
+      <a routerLink="/destinations" class="text-primary small">ดูทั้งหมด <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row g-3">
+      @for (dest of destinations(); track dest.id) {
+        <div class="col-md-4">
+          <a [routerLink]="['/packages']" [queryParams]="{dest: dest.id}" class="text-decoration-none">
+            <div class="card-travel overflow-hidden">
+              <img [src]="dest.image_url || 'https://placehold.co/400x180/e3f2fd/1e3a8a?text=' + dest.name"
+                   class="w-100" style="height:180px;object-fit:cover;" [alt]="dest.name">
+              <div class="p-3">
+                <h6 class="fw-bold mb-1" style="color:var(--navy)">{{ dest.name }}</h6>
+                <p class="text-muted small mb-0">
+                  <i class="bi bi-geo-alt me-1"></i>{{ dest.location }}
+                </p>
+              </div>
+            </div>
+          </a>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- แพ็กเกจแนะนำ -->
+<section class="py-5" style="background:var(--off-white)">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h5 class="fw-bold mb-0" style="color:var(--navy)">🎒 แพ็กเกจทัวร์แนะนำ</h5>
+      <a routerLink="/packages" class="text-primary small">ดูแพ็กเกจทั้งหมด <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row g-3">
+      @for (pkg of packages(); track pkg.id) {
+        <div class="col-md-6">
+          <a [routerLink]="['/packages']" [queryParams]="{id: pkg.id}" class="text-decoration-none">
+            <div class="card-travel overflow-hidden">
+              <img [src]="pkg.image_url || 'https://placehold.co/400x180/1e3a8a/ffffff?text=' + pkg.title"
+                   class="w-100" style="height:180px;object-fit:cover;" [alt]="pkg.title">
+              <div class="p-3">
+                <h6 class="fw-bold mb-2" style="color:var(--navy)">{{ pkg.title }}</h6>
+                @if (pkg.includes && pkg.includes.length) {
+                  <div class="d-flex flex-wrap gap-1 mb-2">
+                    @for (tag of pkg.includes.slice(0,3); track tag) {
+                      <span class="badge rounded-pill" style="background:#E3F2FD;color:var(--primary)">{{ tag }}</span>
+                    }
+                  </div>
+                }
+                <div class="fw-bold" style="color:var(--primary)">
+                  ฿{{ pkg.price.toLocaleString() }} <small class="text-muted fw-normal">/ ท่าน</small>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- CTA เฉพาะยังไม่ login -->
+@if (!auth.isLoggedIn()) {
+  <section class="py-5">
+    <div class="container">
+      <div class="text-center p-4 rounded-3" style="background:var(--primary);">
+        <h5 class="text-white fw-bold mb-2">พร้อมเริ่มการเดินทางแล้วหรือยัง?</h5>
+        <p class="text-white opacity-75 small mb-3">สมัครสมาชิกฟรี รับสิทธิพิเศษมากมาย</p>
+        <a routerLink="/register" class="btn btn-light px-4 fw-semibold" style="color:var(--primary)">
+          สมัครสมาชิกฟรี
+        </a>
+      </div>
+    </div>
+  </section>
+}

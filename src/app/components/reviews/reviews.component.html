@@ -1,0 +1,154 @@
+<div class="page-banner">
+  <div class="container-xl">
+    <h1><i class="bi bi-star-fill me-2"></i>รีวิวจากลูกค้า</h1>
+    <p>ความประทับใจจากนักท่องเที่ยวจริง · {{ reviews().length }} รีวิว</p>
+  </div>
+</div>
+
+<div class="container-xl pb-5">
+  <div class="d-flex justify-content-end mb-4">
+    @if (auth.isLoggedIn()) {
+      <button class="btn btn-primary" (click)="showForm=true">
+        <i class="bi bi-star me-1"></i>เขียนรีวิว
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else {
+    <div class="row g-4">
+      @for (r of reviews(); track r.id) {
+        <div class="col-md-6 col-lg-4 fade-in">
+          <div class="card-travel p-3 h-100 d-flex flex-column">
+            <!-- Header: ชื่อผู้รีวิว + ประเภท -->
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white"
+                     style="width:36px;height:36px;font-weight:700;font-size:0.875rem;">
+                  {{ (r.customer_name || 'U')[0].toUpperCase() }}
+                </div>
+                <div>
+                  <div class="fw-medium small" style="color:var(--navy)">{{ r.customer_name || 'ลูกค้า' }}</div>
+                  <div class="text-muted" style="font-size:0.7rem;">{{ r.created_at | date:'dd MMM yyyy' }}</div>
+                </div>
+              </div>
+              <span class="badge rounded-pill" style="background:#E3F2FD;color:var(--primary)">
+                <i class="bi me-1" [class.bi-bag-heart]="r.item_type==='Package'" [class.bi-building]="r.item_type==='Hotel'"></i>
+                {{ r.item_type }}
+              </span>
+            </div>
+
+            <!-- ชื่อ Package / Hotel ที่รีวิว -->
+            @if (r.item_name) {
+              <div class="mb-2 px-2 py-1 rounded-2 small fw-medium" style="background:var(--off-white);color:var(--navy)">
+                <i class="bi bi-tag me-1 text-primary"></i>{{ r.item_name }}
+              </div>
+            }
+
+            <!-- Stars -->
+            <div class="mb-2">
+              @for (s of stars(r.rating); track $index) {
+                <i class="bi" [class.bi-star-fill]="s" [class.bi-star]="!s"
+                   [class.star-filled]="s" [class.star-empty]="!s" style="font-size:0.85rem;"></i>
+              }
+              <span class="text-muted small ms-1">{{ r.rating }}/5</span>
+            </div>
+
+            <p class="text-muted small mb-0 flex-grow-1">{{ r.comment }}</p>
+
+            @if (auth.isAdmin()) {
+              <div class="mt-2 pt-2 border-top">
+                <button class="btn btn-sm btn-outline-danger" (click)="delete(r.id)">
+                  <i class="bi bi-trash me-1"></i>ลบ
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="col-12 text-center py-5 text-muted">
+          <i class="bi bi-star display-4 d-block mb-2"></i>ยังไม่มีรีวิว
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal เขียนรีวิว -->
+@if (showForm) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:var(--radius-lg);">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold" style="color:var(--navy)">
+            <i class="bi bi-star me-2 text-warning"></i>เขียนรีวิว
+          </h5>
+          <button class="btn-close" (click)="showForm=false"></button>
+        </div>
+        <div class="modal-body">
+          @if (error) { <div class="alert alert-danger py-2 small">{{ error }}</div> }
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label small fw-medium">ประเภท</label>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm flex-fill"
+                        [class.btn-primary]="form.item_type==='Package'"
+                        [class.btn-outline-secondary]="form.item_type!=='Package'"
+                        (click)="form.item_type='Package'; onTypeChange()">
+                  <i class="bi bi-bag-heart me-1"></i>แพ็กเกจ
+                </button>
+                <button class="btn btn-sm flex-fill"
+                        [class.btn-primary]="form.item_type==='Hotel'"
+                        [class.btn-outline-secondary]="form.item_type!=='Hotel'"
+                        (click)="form.item_type='Hotel'; onTypeChange()">
+                  <i class="bi bi-building me-1"></i>โรงแรม
+                </button>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-medium">
+                เลือก{{ form.item_type === 'Package' ? 'แพ็กเกจ' : 'โรงแรม' }}
+              </label>
+              <select class="form-select" [(ngModel)]="form.item_id">
+                <option value="">-- กรุณาเลือก --</option>
+                @for (opt of itemOptions; track opt.id) {
+                  <option [value]="opt.id">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-medium">คะแนน</label>
+              <div class="d-flex gap-2 align-items-center">
+                @for (i of [1,2,3,4,5]; track i) {
+                  <i class="bi fs-3 cursor-pointer"
+                     [class.bi-star-fill]="i <= (hoverRating || form.rating)"
+                     [class.bi-star]="i > (hoverRating || form.rating)"
+                     [class.star-filled]="i <= (hoverRating || form.rating)"
+                     [class.star-empty]="i > (hoverRating || form.rating)"
+                     (mouseenter)="hoverRating=i"
+                     (mouseleave)="hoverRating=0"
+                     (click)="form.rating=i"></i>
+                }
+                <span class="text-muted small ms-1">{{ form.rating }} ดาว</span>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-medium">ความคิดเห็น</label>
+              <textarea class="form-control" [(ngModel)]="form.comment"
+                        rows="4" placeholder="แชร์ประสบการณ์ของคุณ..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button class="btn btn-light" (click)="showForm=false">ยกเลิก</button>
+          <button class="btn btn-primary" (click)="submit()" [disabled]="saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            <i class="bi bi-send me-1"></i>ส่งรีวิว
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

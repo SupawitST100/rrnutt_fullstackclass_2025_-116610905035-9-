@@ -1,0 +1,184 @@
+<div class="page-banner">
+  <div class="container-xl">
+    <h1><i class="bi bi-airplane-fill me-2"></i>เที่ยวบิน</h1>
+    <p>ค้นหาและจองเที่ยวบินได้ง่ายๆ</p>
+  </div>
+</div>
+
+<div class="container-xl pb-5">
+  <!-- Search Bar -->
+  <div class="card border-0 shadow-sm mb-4 p-3" style="border-radius:var(--radius);">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label small text-muted">ต้นทาง</label>
+        <select class="form-select" [(ngModel)]="filterDep" (change)="applyFilter()">
+          <option value="">-- ทุกต้นทาง --</option>
+          @for (dep of depOptions; track dep) {
+            <option [value]="dep">{{ dep }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small text-muted">ปลายทาง</label>
+        <select class="form-select" [(ngModel)]="filterArr" (change)="applyFilter()">
+          <option value="">-- ทุกปลายทาง --</option>
+          @for (arr of arrOptions; track arr) {
+            <option [value]="arr">{{ arr }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-4 d-flex gap-2 justify-content-end">
+        <button class="btn btn-outline-secondary" (click)="reset()">
+          <i class="bi bi-x-circle me-1"></i>รีเซ็ต
+        </button>
+        @if (auth.isAdmin()) {
+          <button class="btn btn-primary" (click)="openAdd()">
+            <i class="bi bi-plus-lg me-1"></i>เพิ่มเที่ยวบิน
+          </button>
+        }
+      </div>
+    </div>
+    <!-- จำนวนที่พบ -->
+    <div class="mt-2 text-muted small">
+      พบ {{ filtered().length }} เที่ยวบิน
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else {
+    <div class="d-flex flex-column gap-3">
+      @for (f of filtered(); track f.id) {
+        <div class="card-travel p-3 fade-in">
+          <div class="row align-items-center g-3">
+            <div class="col-auto">
+              <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold"
+                   style="width:48px;height:48px;font-size:0.75rem;">
+                {{ f.airline.slice(0,2) }}
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="fw-bold" style="color:var(--navy)">{{ f.airline }}</div>
+              <div class="text-muted small">{{ f.flight_no }}</div>
+            </div>
+            <div class="col-md-4">
+              <div class="d-flex align-items-center gap-3">
+                <div class="text-center">
+                  <div class="fw-bold fs-5" style="color:var(--navy)">{{ f.departure_loc }}</div>
+                  <div class="text-muted small">ต้นทาง</div>
+                </div>
+                <div class="flex-grow-1 text-center">
+                  <div class="text-muted small mb-1">{{ f.time_schedule }}</div>
+                  <div style="height:2px;background:linear-gradient(to right,var(--primary),var(--accent));border-radius:2px;"></div>
+                  <i class="bi bi-airplane-fill text-primary small"></i>
+                </div>
+                <div class="text-center">
+                  <div class="fw-bold fs-5" style="color:var(--navy)">{{ f.arrival_loc }}</div>
+                  <div class="text-muted small">ปลายทาง</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2 text-end">
+              <div class="fw-bold fs-5" style="color:var(--primary)">฿{{ f.price.toLocaleString() }}</div>
+              <div class="text-muted small">ต่อที่นั่ง</div>
+            </div>
+            <div class="col-auto d-flex gap-2">
+              <button class="btn btn-sm btn-primary px-3" (click)="openBook(f)">
+                <i class="bi bi-cart-plus me-1"></i>จอง
+              </button>
+              @if (auth.isAdmin()) {
+                <button class="btn btn-sm btn-outline-secondary" (click)="openEdit(f)"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-outline-danger" (click)="delete(f.id)"><i class="bi bi-trash"></i></button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-airplane display-4 d-block mb-2"></i>ไม่พบเที่ยวบิน
+          <div class="mt-3">
+            <button class="btn btn-outline-primary btn-sm" (click)="reset()">ล้างตัวกรอง</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal CRUD -->
+@if (showForm) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:var(--radius-lg);">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold" style="color:var(--navy)">{{ editItem ? 'แก้ไขเที่ยวบิน' : 'เพิ่มเที่ยวบิน' }}</h5>
+          <button class="btn-close" (click)="closeForm()"></button>
+        </div>
+        <div class="modal-body">
+          @if (error) { <div class="alert alert-danger py-2 small">{{ error }}</div> }
+          <div class="row g-3">
+            <div class="col-6"><label class="form-label small fw-medium">สายการบิน</label><input class="form-control" [(ngModel)]="form.airline"></div>
+            <div class="col-6"><label class="form-label small fw-medium">หมายเลขเที่ยวบิน</label><input class="form-control" [(ngModel)]="form.flight_no"></div>
+            <div class="col-6"><label class="form-label small fw-medium">ต้นทาง</label><input class="form-control" [(ngModel)]="form.departure_loc"></div>
+            <div class="col-6"><label class="form-label small fw-medium">ปลายทาง</label><input class="form-control" [(ngModel)]="form.arrival_loc"></div>
+            <div class="col-6"><label class="form-label small fw-medium">ตารางเวลา</label><input class="form-control" [(ngModel)]="form.time_schedule" placeholder="08:00 - 14:00"></div>
+            <div class="col-6"><label class="form-label small fw-medium">ราคา (บาท)</label><input type="number" class="form-control" [(ngModel)]="form.price"></div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button class="btn btn-light" (click)="closeForm()">ยกเลิก</button>
+          <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }บันทึก
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal จอง -->
+@if (bookingFlight) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:var(--radius-lg);">
+        @if (!bookingSuccess) {
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold" style="color:var(--navy)">
+              <i class="bi bi-airplane me-2 text-primary"></i>ยืนยันการจอง
+            </h5>
+            <button class="btn-close" (click)="closeBook()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="bg-light rounded-3 p-3 mb-3">
+              <div class="fw-bold mb-1" style="color:var(--navy)">{{ bookingFlight.airline }} ({{ bookingFlight.flight_no }})</div>
+              <div class="text-muted small"><i class="bi bi-geo me-1"></i>{{ bookingFlight.departure_loc }} → {{ bookingFlight.arrival_loc }}</div>
+              <div class="text-muted small"><i class="bi bi-clock me-1"></i>{{ bookingFlight.time_schedule }}</div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted">ราคารวม</span>
+              <span class="fw-bold fs-5" style="color:var(--primary)">฿{{ bookingFlight.price.toLocaleString() }}</span>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button class="btn btn-light" (click)="closeBook()">ยกเลิก</button>
+            <button class="btn btn-primary px-4" (click)="confirmBook()" [disabled]="booking">
+              @if (booking) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              <i class="bi bi-check-circle me-1"></i>ยืนยันจอง
+            </button>
+          </div>
+        } @else {
+          <div class="modal-body text-center py-5">
+            <i class="bi bi-check-circle-fill text-success display-3 d-block mb-3"></i>
+            <h5 class="fw-bold mb-2">จองสำเร็จ!</h5>
+            <p class="text-muted small mb-4">ไปที่หน้าการจองเพื่อชำระเงิน</p>
+            <div class="d-flex gap-2 justify-content-center">
+              <a routerLink="/bookings" class="btn btn-primary">ดูการจอง</a>
+              <button class="btn btn-light" (click)="closeBook()">ปิด</button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
