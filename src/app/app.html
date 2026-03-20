@@ -1,23 +1,15 @@
-<header>
-    <div class="container navbar">
-        <a routerLink="/" class="logo"><i class="fa-solid fa-plane-departure"></i> TravelFlow</a>
-        <ul class="nav-links">
-            <li><a routerLink="/flights">เที่ยวบิน</a></li>
-            <li><a routerLink="/hotels">โรงแรม</a></li>
-            <li><a routerLink="/destinations">สถานที่ (Destinations)</a></li>
-            <li><a routerLink="/packages">แพ็กเกจ</a></li>
-        </ul>
-        <a routerLink="/customers" class="btn-login"><i class="fa-regular fa-user"></i> เข้าสู่ระบบ</a>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-brand" routerLink="/">
+      <span class="brand-icon">✈</span>
+      TravelBooking
+    </a>
+    <div class="nav-links">
+      <a routerLink="/reviews" routerLinkActive="active" class="nav-link">Reviews</a>
+      <a routerLink="/reviews/new" routerLinkActive="active" class="nav-link">Write Review</a>
+      <a routerLink="/customers/c001" routerLinkActive="active" class="nav-link">My Profile</a>
     </div>
-</header>
+  </div>
+</nav>
 
-<main style="min-height: 70vh;">
-    <router-outlet></router-outlet>
-</main>
-
-<footer>
-    <div class="container">
-        <h2>TravelFlow</h2>
-        <p class="footer-text">© 2026 Travel Booking System. All rights reserved. (Project by RMUTT Students)</p>
-    </div>
-</footer>
+<router-outlet />

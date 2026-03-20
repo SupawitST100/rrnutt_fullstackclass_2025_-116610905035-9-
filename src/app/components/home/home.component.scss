@@ -1,0 +1,62 @@
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--primary) 55%, var(--accent) 100%);
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(66,165,245,0.18) 0%, transparent 60%);
+}
+.hero-title {
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.15;
+}
+.hero-badge {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(8px);
+  border-radius: 50px;
+  padding: 6px 18px;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+.feature-icon {
+  width: 64px; height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  color: white;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(21,101,192,0.3);
+}
+.stats-bar {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 32px 40px;
+  margin-top: -60px;
+  position: relative;
+  z-index: 10;
+}
+.stat-number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.cta-section {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+}

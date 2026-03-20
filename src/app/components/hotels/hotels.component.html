@@ -1,0 +1,159 @@
+<div class="page-banner">
+  <div class="container-xl">
+    <h1><i class="bi bi-building-fill me-2"></i>โรงแรมและที่พัก</h1>
+    <p>เลือกที่พักสุดพิเศษที่เหมาะกับคุณ</p>
+  </div>
+</div>
+
+<div class="container-xl pb-5">
+  <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <div class="input-group" style="max-width:280px;">
+        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+        <input class="form-control" placeholder="ค้นหาโรงแรม..." [(ngModel)]="search" (input)="filter()">
+      </div>
+
+    </div>
+    @if (auth.isAdmin()) {
+      <button class="btn btn-primary" (click)="openAdd()"><i class="bi bi-plus-lg me-1"></i>เพิ่มโรงแรม</button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else {
+    <div class="row g-4">
+      @for (h of filtered(); track h.id) {
+        <div class="col-md-6 col-lg-4 fade-in">
+          <div class="card-travel h-100 d-flex flex-column">
+            <img [src]="h.image_url || 'https://placehold.co/400x220/e3f2fd/1e3a8a?text=Hotel'"
+                 class="w-100" style="height:200px;object-fit:cover;" [alt]="h.name">
+            <div class="p-3 d-flex flex-column flex-grow-1">
+              <h6 class="fw-bold mb-1" style="color:var(--navy)">{{ h.name }}</h6>
+              <p class="text-muted small mb-2"><i class="bi bi-geo-alt me-1"></i>{{ h.location }}</p>
+              <div class="mb-2 small">
+                @if (getRating(h.id); as rv) {
+                  @if (rv.count > 0) {
+                    <i class="bi bi-star-fill star-filled me-1"></i>
+                    <span class="fw-medium">{{ rv.avg }}</span>
+                    <span class="text-muted">({{ rv.count }} รีวิว)</span>
+                  } @else {
+                    <span class="text-muted">ยังไม่มีรีวิว</span>
+                  }
+                } @else {
+                  <span class="text-muted">ยังไม่มีรีวิว</span>
+                }
+              </div>
+              <div class="mt-auto">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted small">ราคาต่อคืน</span>
+                  <span class="fw-bold fs-5" style="color:var(--primary)">฿{{ h.price_per_night.toLocaleString() }}</span>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-primary flex-fill" (click)="openBook(h)">
+                    <i class="bi bi-calendar-plus me-1"></i>จองที่พัก
+                  </button>
+                  @if (auth.isAdmin()) {
+                    <button class="btn btn-sm btn-outline-secondary" (click)="openEdit(h)"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="delete(h.id)"><i class="bi bi-trash"></i></button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="col-12 text-center py-5 text-muted">
+          <i class="bi bi-building display-4 d-block mb-2"></i>ไม่พบโรงแรม
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal CRUD -->
+@if (showForm) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:var(--radius-lg);">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold" style="color:var(--navy)">{{ editItem ? 'แก้ไขโรงแรม' : 'เพิ่มโรงแรม' }}</h5>
+          <button class="btn-close" (click)="closeForm()"></button>
+        </div>
+        <div class="modal-body">
+          @if (error) { <div class="alert alert-danger py-2 small">{{ error }}</div> }
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label small fw-medium">ชื่อโรงแรม</label><input class="form-control" [(ngModel)]="form.name"></div>
+            <div class="col-12"><label class="form-label small fw-medium">ที่ตั้ง</label><input class="form-control" [(ngModel)]="form.location"></div>
+            <div class="col-12"><label class="form-label small fw-medium">ราคา/คืน (บาท)</label><input type="number" class="form-control" [(ngModel)]="form.price_per_night"></div>
+            <div class="col-12"><label class="form-label small fw-medium">URL รูปภาพ</label><input class="form-control" [(ngModel)]="form.image_url"></div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button class="btn btn-light" (click)="closeForm()">ยกเลิก</button>
+          <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }บันทึก
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal จอง -->
+@if (bookingHotel) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:var(--radius-lg);">
+        @if (!bookingSuccess) {
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold" style="color:var(--navy)">
+              <i class="bi bi-building me-2 text-primary"></i>จองที่พัก
+            </h5>
+            <button class="btn-close" (click)="closeBook()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="bg-light rounded-3 p-3 mb-3">
+              <div class="fw-bold mb-1" style="color:var(--navy)">{{ bookingHotel.name }}</div>
+              <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i>{{ bookingHotel.location }}</div>
+              <div class="text-muted small">฿{{ bookingHotel.price_per_night.toLocaleString() }} / คืน</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-medium">จำนวนคืน</label>
+              <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary btn-sm px-3"
+                        (click)="decNights()">-</button>
+                <span class="fw-bold fs-5">{{ bookingNights }}</span>
+                <button class="btn btn-outline-secondary btn-sm px-3"
+                        (click)="incNights()">+</button>
+                <span class="text-muted small">คืน</span>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center border-top pt-3">
+              <span class="text-muted">ราคารวม</span>
+              <span class="fw-bold fs-5" style="color:var(--primary)">฿{{ totalPrice.toLocaleString() }}</span>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button class="btn btn-light" (click)="closeBook()">ยกเลิก</button>
+            <button class="btn btn-primary px-4" (click)="confirmBook()" [disabled]="booking">
+              @if (booking) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              <i class="bi bi-check-circle me-1"></i>ยืนยันจอง
+            </button>
+          </div>
+        } @else {
+          <div class="modal-body text-center py-5">
+            <i class="bi bi-check-circle-fill text-success display-3 d-block mb-3"></i>
+            <h5 class="fw-bold mb-2">จองสำเร็จ!</h5>
+            <p class="text-muted small mb-4">ไปที่หน้าการจองเพื่อชำระเงิน</p>
+            <div class="d-flex gap-2 justify-content-center">
+              <a routerLink="/bookings" class="btn btn-primary">ดูการจอง</a>
+              <button class="btn btn-light" (click)="closeBook()">ปิด</button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

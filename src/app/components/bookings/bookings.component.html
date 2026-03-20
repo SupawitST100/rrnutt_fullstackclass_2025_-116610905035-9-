@@ -1,0 +1,145 @@
+<div class="page-banner">
+  <div class="container-xl">
+    <h1><i class="bi bi-calendar-check-fill me-2"></i>การจองของฉัน</h1>
+    <p>ติดตามสถานะการจองทั้งหมดของคุณ</p>
+  </div>
+</div>
+
+<div class="container-xl pb-5">
+  <!-- Filter -->
+  <div class="d-flex gap-2 mb-4 flex-wrap">
+    @for (s of ['', 'Pending', 'Paid', 'Cancelled']; track s) {
+      <button class="btn btn-sm"
+              [class.btn-primary]="filterStatus===s"
+              [class.btn-outline-secondary]="filterStatus!==s"
+              (click)="filterStatus=s">
+        {{ s || 'ทั้งหมด' }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else {
+    <div class="d-flex flex-column gap-3">
+      @for (b of filtered; track b.id) {
+        <div class="card-travel p-3 fade-in">
+          <div class="row align-items-center g-3">
+            <div class="col-auto">
+              <div class="d-flex align-items-center justify-content-center rounded-circle"
+                   style="width:48px;height:48px;background:var(--off-white);">
+                <i class="bi bi-receipt fs-5 text-primary"></i>
+              </div>
+            </div>
+            <div class="col">
+              <div class="d-flex gap-2 align-items-center flex-wrap">
+                <span class="fw-bold" style="color:var(--navy)">#{{ b.id }}</span>
+                <span class="small rounded-pill px-2 py-1 fw-medium" [class]="statusClass(b.status)">
+                  <i class="bi me-1" [class]="statusIcon(b.status)"></i>{{ b.status }}
+                </span>
+              </div>
+              <div class="text-muted small mt-1">
+                {{ b.customer_name || ('ลูกค้า #' + b.customer_id) }} ·
+                {{ b.booking_date | date:'dd MMM yyyy HH:mm' }}
+              </div>
+            </div>
+            <div class="col-auto text-end">
+              <div class="fw-bold fs-5" style="color:var(--primary)">฿{{ b.total_amount.toLocaleString() }}</div>
+              <div class="d-flex gap-2 mt-2 justify-content-end">
+                @if (b.status === 'Pending') {
+                  <button class="btn btn-sm btn-success" (click)="openPay(b)">
+                    <i class="bi bi-credit-card me-1"></i>ชำระเงิน
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="cancel(b.id)">
+                    <i class="bi bi-x me-1"></i>ยกเลิก
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-calendar-x display-4 d-block mb-2"></i>ไม่มีการจอง
+          <div class="mt-3">
+            <a routerLink="/packages" class="btn btn-primary btn-sm">ดูแพ็กเกจทัวร์</a>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal ชำระเงิน -->
+@if (showPayModal && selectedBooking) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:var(--radius-lg);">
+
+        @if (!paySuccess) {
+          <!-- หน้าเลือกวิธีชำระ -->
+          <div class="modal-header border-0">
+            <h5 class="modal-title fw-bold" style="color:var(--navy)">
+              <i class="bi bi-credit-card me-2 text-primary"></i>ชำระเงิน
+            </h5>
+            <button class="btn-close" (click)="closePay()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="bg-light rounded-3 p-3 mb-4 text-center">
+              <div class="text-muted small">ยอดที่ต้องชำระ</div>
+              <div class="fw-bold display-6" style="color:var(--primary)">
+                ฿{{ selectedBooking.total_amount.toLocaleString() }}
+              </div>
+              <div class="text-muted small">การจอง #{{ selectedBooking.id }}</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-medium">วิธีชำระเงิน</label>
+              <div class="d-flex gap-3">
+                <div class="flex-fill border rounded-3 p-3 cursor-pointer"
+                     [class.border-primary]="payMethod==='Credit Card'"
+                     [class.bg-primary]="payMethod==='Credit Card'"
+                     [class.bg-opacity-10]="payMethod==='Credit Card'"
+                     (click)="payMethod='Credit Card'">
+                  <i class="bi bi-credit-card-2-front-fill me-2 text-primary"></i>
+                  <span class="fw-medium small">Credit Card</span>
+                </div>
+                <div class="flex-fill border rounded-3 p-3 cursor-pointer"
+                     [class.border-primary]="payMethod==='PromptPay'"
+                     [class.bg-primary]="payMethod==='PromptPay'"
+                     [class.bg-opacity-10]="payMethod==='PromptPay'"
+                     (click)="payMethod='PromptPay'">
+                  <i class="bi bi-qr-code me-2 text-primary"></i>
+                  <span class="fw-medium small">PromptPay</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button class="btn btn-light" (click)="closePay()">ยกเลิก</button>
+            <button class="btn btn-success px-4" (click)="confirmPay()" [disabled]="paying">
+              @if (paying) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              <i class="bi bi-check-circle me-1"></i>ยืนยันชำระเงิน
+            </button>
+          </div>
+
+        } @else {
+          <!-- หน้าสรุปหลังจ่ายสำเร็จ -->
+          <div class="modal-body text-center py-5">
+            <i class="bi bi-check-circle-fill text-success display-3 d-block mb-3"></i>
+            <h5 class="fw-bold mb-1">ชำระเงินสำเร็จ!</h5>
+            <p class="text-muted small mb-1">การจอง #{{ selectedBooking.id }}</p>
+            <p class="fw-bold mb-1" style="color:var(--primary)">
+              ฿{{ selectedBooking.total_amount.toLocaleString() }}
+            </p>
+            <p class="text-muted small mb-4">ผ่าน {{ payMethod }}</p>
+            <button class="btn btn-primary px-4" (click)="closePay()">
+              <i class="bi bi-check me-1"></i>เสร็จสิ้น
+            </button>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+}
